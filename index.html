@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Coding</title>
+    <link rel="icon" type="image/png" href="Airbrush-Image-Enhancer-1761540581476-Photoroom.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
@@ -84,8 +85,21 @@
         }
 
         .logo {
-            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
             font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        .logo-frame {
+            width: 38px;
+            height: 38px;
+            object-fit: contain;
+        }
+
+        .logo-text {
             background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -532,19 +546,47 @@
 
     <div class="navbar">
         <div class="navbar-left">
-            <div class="logo"><i class="fas fa-code"></i> Smart Coding</div>
+            <div class="logo">
+                <img src="Airbrush-Image-Enhancer-1761540581476-Photoroom.png" alt="Smart Coding Logo" class="logo-frame">
+                <span class="logo-text">Smart Coding</span>
+            </div>
             <span style="color: var(--text-secondary); font-size: 12px; margin-left: 10px; user-select: none;"></span>
             <select id="languageSelector">
-                <option value="python">Python</option>
-                <option value="javascript">JavaScript</option>
+                <option value="python">Python 3.12.0</option>
+                <option value="pypy">PyPy 3.10</option>
+                <option value="javascript">JavaScript (NodeJS v16.19.1)</option>
+                <option value="react">React (JSX)</option>
+                <option value="typescript">TypeScript 5.0.4 (NodeJS v16.19.1)</option>
                 <option value="html">HTML</option>
                 <option value="css">CSS</option>
+                <option value="json">JSON</option>
+                <option value="yaml">YAML</option>
+                <option value="markdown">Markdown</option>
+                <option value="plaintext">Plain Text</option>
+                <option value="java">Java SE JDK 11.0.11</option>
+                <option value="java">Java OpenJDK 1.8.0.282</option>
+                <option value="java">Java OpenJDK 20</option>
+                <option value="cpp">C++ (GCC 9.3.0)</option>
+                <option value="c">C</option>
+                <option value="csharp">C# Mono 6.8.0</option>
+                <option value="csharp">C# 12 (.NET 8)</option>
+                <option value="php">PHP 7.4.3</option>
+                <option value="pascal">Free Pascal 3.0.4</option>
+                <option value="pascalabc">PascalABC.NET 3.6.2</option>
+                <option value="go">Golang 1.20.3</option>
+                <option value="kotlin">Kotlin 1.9.0</option>
+                <option value="ruby">Ruby 2.7.0</option>
+                <option value="swift">Swift 5.8</option>
+                <option value="dart">Dart 3.1.0</option>
+                <option value="rust">Rust</option>
+                <option value="haskell">Haskell</option>
             </select>
         </div>
         <div class="navbar-center">
             <button id="runBtn" class="btn-success"><i class="fas fa-play"></i> Run</button>
             <button id="clearBtn"><i class="fas fa-eraser"></i> Clear</button>
             <button id="saveBtn" class="btn-primary"><i class="fas fa-save"></i> Save</button>
+            <button id="formatBtn"><i class="fas fa-wand-magic-sparkles"></i> Format</button>
         </div>
         <div class="navbar-right">
             <select id="themeSelector" style="margin-right: 10px;">
@@ -552,6 +594,7 @@
                 <option value="light">Light Theme</option>
                 <option value="hacker">Hacker CMD</option>
             </select>
+            <button id="uploadBtn"><i class="fas fa-file-upload"></i> Upload</button>
             <button id="downloadBtn"><i class="fas fa-download"></i> Download</button>
         </div>
     </div>
@@ -610,6 +653,17 @@
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/typescript@5.6.3/lib/typescript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-yaml@4.1.0/dist/js-yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.22.20/babel.min.js"></script>
+    <script src="https://unpkg.com/prettier@3.3.3/standalone.js"></script>
+    <script src="https://unpkg.com/prettier@3.3.3/parser-babel.js"></script>
+    <script src="https://unpkg.com/prettier@3.3.3/parser-html.js"></script>
+    <script src="https://unpkg.com/prettier@3.3.3/parser-postcss.js"></script>
+    <script src="https://unpkg.com/prettier@3.3.3/parser-typescript.js"></script>
+    <script src="https://unpkg.com/prettier@3.3.3/parser-markdown.js"></script>
+    <script src="https://unpkg.com/prettier@3.3.3/parser-yaml.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
 
@@ -635,9 +689,18 @@
                 minimap: { enabled: true },
                 automaticLayout: true,
                 scrollBeyondLastLine: false,
-                wordWrap: 'on'
+                wordWrap: 'on',
+                tabCompletion: 'on',
+                quickSuggestions: { other: true, comments: false, strings: true },
+                suggestOnTriggerCharacters: true,
+                acceptSuggestionOnEnter: 'on',
+                parameterHints: { enabled: true },
+                autoClosingBrackets: 'always',
+                autoClosingQuotes: 'always',
+                snippetSuggestions: 'inline'
             });
 
+            setupCompletions();
             loadFromLocalStorage();
             renderFileExplorer();
             updateTheme();
@@ -752,18 +815,325 @@
                 }
 
                 editor.setValue(file.content || '');
-                const lang = file.language || detectLanguage(file.name);
-                monaco.editor.setModelLanguage(editor.getModel(), lang);
-                document.getElementById('languageSelector').value = lang;
+                const storedLang = file.language || detectLanguage(file.name);
+                const monacoLang = getMonacoLanguage(storedLang);
+                monaco.editor.setModelLanguage(editor.getModel(), monacoLang);
+                document.getElementById('languageSelector').value = storedLang;
 
                 updateActiveTab();
             }
         }
 
         function detectLanguage(filename) {
-            const ext = filename.split('.').pop();
-            const langMap = { py: 'python', js: 'javascript', html: 'html', css: 'css' };
+            const ext = filename.split('.').pop().toLowerCase();
+            const langMap = {
+                py: 'python',
+                pyc: 'python',
+                pyi: 'python',
+                pyw: 'python',
+                jsx: 'react',
+                js: 'javascript',
+                mjs: 'javascript',
+                cjs: 'javascript',
+                ts: 'typescript',
+                tsx: 'typescript',
+                html: 'html',
+                htm: 'html',
+                css: 'css',
+                json: 'json',
+                yml: 'yaml',
+                yaml: 'yaml',
+                md: 'markdown',
+                markdown: 'markdown',
+                txt: 'plaintext',
+                java: 'java',
+                kt: 'kotlin',
+                kts: 'kotlin',
+                c: 'c',
+                h: 'c',
+                cpp: 'cpp',
+                cc: 'cpp',
+                cxx: 'cpp',
+                hpp: 'cpp',
+                hh: 'cpp',
+                cs: 'csharp',
+                go: 'go',
+                php: 'php',
+                pas: 'pascal',
+                p: 'pascal',
+                pp: 'pascal',
+                abc: 'pascalabc',
+                pabc: 'pascalabc',
+                rb: 'ruby',
+                swift: 'swift',
+                dart: 'dart',
+                rs: 'rust',
+                hs: 'haskell'
+            };
             return langMap[ext] || 'plaintext';
+        }
+
+        function getMonacoLanguage(language) {
+            const map = {
+                pypy: 'python',
+                react: 'javascript',
+                java: 'java',
+                cpp: 'cpp',
+                c: 'cpp',
+                csharp: 'csharp',
+                php: 'php',
+                pascal: 'pascal',
+                pascalabc: 'pascal',
+                go: 'go',
+                kotlin: 'kotlin',
+                ruby: 'ruby',
+                swift: 'swift',
+                dart: 'dart',
+                rust: 'rust',
+                haskell: 'plaintext'
+            };
+            return map[language] || language;
+        }
+
+        function setupCompletions() {
+            if (window._smartCodingCompletionsReady) return;
+            window._smartCodingCompletionsReady = true;
+
+            const snippetRule = monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
+
+            const completionGroups = {
+                python: [
+                    {
+                        label: 'def',
+                        detail: 'Function definition',
+                        insertText: 'def ${1:function_name}(${2:args}):\n    ${3:pass}'
+                    },
+                    {
+                        label: 'ifmain',
+                        detail: 'Main guard',
+                        insertText: 'if __name__ == "__main__":\n    ${1:main()}'
+                    },
+                    {
+                        label: 'for',
+                        detail: 'For loop',
+                        insertText: 'for ${1:item} in ${2:iterable}:\n    ${3:pass}'
+                    }
+                ],
+                javascript: [
+                    {
+                        label: 'clg',
+                        detail: 'console.log',
+                        insertText: 'console.log(${1:value});'
+                    },
+                    {
+                        label: 'fn',
+                        detail: 'Function declaration',
+                        insertText: 'function ${1:name}(${2:params}) {\n    ${3:// code}\n}'
+                    },
+                    {
+                        label: 'promise',
+                        detail: 'Promise template',
+                        insertText: 'return new Promise((resolve, reject) => {\n    ${1:// async work}\n});'
+                    }
+                ],
+                react: [
+                    {
+                        label: 'fc',
+                        detail: 'React function component',
+                        insertText: 'const ${1:Component} = (${2:props}) => {\n    return (\n        <div>\n            ${3:/* content */}\n        </div>\n    );\n};\n\nexport default ${1:Component};',
+                        documentation: 'Create a React functional component'
+                    },
+                    {
+                        label: 'useState',
+                        detail: 'useState hook',
+                        insertText: 'const [${1:state}, ${2:setState}] = useState(${3:initialValue});',
+                        documentation: 'React useState hook'
+                    }
+                ],
+                typescript: [
+                    {
+                        label: 'interface',
+                        detail: 'Interface',
+                        insertText: 'interface ${1:Name} {\n    ${2:key}: ${3:type};\n}'
+                    },
+                    {
+                        label: 'type',
+                        detail: 'Type alias',
+                        insertText: 'type ${1:Alias} = {\n    ${2:key}: ${3:type};\n};'
+                    }
+                ],
+                java: [
+                    {
+                        label: 'psvm',
+                        detail: 'Main method',
+                        insertText: 'public class ${1:Main} {\n    public static void main(String[] args) {\n        ${2:System.out.println("Hello, World!");}\n    }\n}'
+                    },
+                    {
+                        label: 'sysout',
+                        detail: 'System.out.println',
+                        insertText: 'System.out.println(${1});'
+                    }
+                ],
+                cpp: [
+                    {
+                        label: 'main',
+                        detail: 'C++ main',
+                        insertText: '#include <iostream>\n\nint main() {\n    ${1:std::cout << "Hello, World!" << std::endl;}\n    return 0;\n}'
+                    },
+                    {
+                        label: 'fori',
+                        detail: 'For loop',
+                        insertText: 'for (int ${1:i} = 0; ${1:i} < ${2:n}; ++${1:i}) {\n    ${3:// code}\n}'
+                    }
+                ],
+                c: [
+                    {
+                        label: 'main',
+                        detail: 'C main',
+                        insertText: '#include <stdio.h>\n\nint main(void) {\n    ${1:printf("Hello, World!\\n");}\n    return 0;\n}'
+                    }
+                ],
+                csharp: [
+                    {
+                        label: 'psvm',
+                        detail: 'C# Program',
+                        insertText: 'using System;\n\nclass ${1:Program} {\n    static void Main(string[] args) {\n        ${2:Console.WriteLine("Hello, World!");}\n    }\n}'
+                    },
+                    {
+                        label: 'cw',
+                        detail: 'Console.WriteLine',
+                        insertText: 'Console.WriteLine(${1});'
+                    }
+                ],
+                php: [
+                    {
+                        label: 'php',
+                        detail: 'PHP template',
+                        insertText: '<?php\n${1:// code}\n?>'
+                    },
+                    {
+                        label: 'function',
+                        detail: 'Function',
+                        insertText: 'function ${1:name}(${2:$param}) {\n    ${3:// code}\n}'
+                    }
+                ],
+                pascal: [
+                    {
+                        label: 'program',
+                        detail: 'Pascal program',
+                        insertText: 'program ${1:ProgramName};\nbegin\n    ${2:writeln("Hello, World!");}\nend.'
+                    }
+                ],
+                go: [
+                    {
+                        label: 'main',
+                        detail: 'Go main',
+                        insertText: 'package main\n\nimport "fmt"\n\nfunc main() {\n    ${1:fmt.Println("Hello, World!")}\n}'
+                    }
+                ],
+                kotlin: [
+                    {
+                        label: 'main',
+                        detail: 'Kotlin main',
+                        insertText: 'fun main() {\n    ${1:println("Hello, World!")}\n}'
+                    }
+                ],
+                ruby: [
+                    {
+                        label: 'def',
+                        detail: 'Method definition',
+                        insertText: 'def ${1:method_name}(${2:args})\n  ${3:# code}\nend'
+                    }
+                ],
+                swift: [
+                    {
+                        label: 'func',
+                        detail: 'Function',
+                        insertText: 'func ${1:name}(${2:parameters}) -> ${3:ReturnType} {\n    ${4:// code}\n}'
+                    },
+                    {
+                        label: 'main',
+                        detail: 'Main entry',
+                        insertText: 'import Foundation\n\n@main\nstruct ${1:App} {\n    static func main() {\n        ${2:print("Hello, World!")}\n    }\n}'
+                    }
+                ],
+                dart: [
+                    {
+                        label: 'main',
+                        detail: 'Dart main',
+                        insertText: 'void main() {\n  ${1:print("Hello, World!");}\n}'
+                    }
+                ],
+                rust: [
+                    {
+                        label: 'main',
+                        detail: 'Rust main',
+                        insertText: 'fn main() {\n    ${1:println!("Hello, world!");}\n}'
+                    }
+                ],
+                haskell: [
+                    {
+                        label: 'main',
+                        detail: 'Haskell main',
+                        insertText: 'main :: IO ()\nmain = do\n    ${1:putStrLn "Hello, World!"}'
+                    }
+                ],
+                css: [
+                    {
+                        label: 'rule',
+                        detail: 'CSS rule',
+                        insertText: '${1:selector} {\n    ${2:property}: ${3:value};\n}'
+                    }
+                ]
+            };
+
+            const aggregated = {};
+            Object.entries(completionGroups).forEach(([language, snippets]) => {
+                const monacoLanguage = getMonacoLanguage(language);
+                aggregated[monacoLanguage] = (aggregated[monacoLanguage] || []).concat(snippets);
+            });
+
+            Object.entries(aggregated).forEach(([monacoLanguage, snippets]) => {
+                monaco.languages.registerCompletionItemProvider(monacoLanguage, {
+                    provideCompletionItems: (model, position) => {
+                        const word = model.getWordUntilPosition(position);
+                        const range = new monaco.Range(position.lineNumber, word.startColumn, position.lineNumber, word.endColumn);
+                        return {
+                            suggestions: snippets.map((snippet, index) => ({
+                                label: snippet.label,
+                                kind: snippet.kind || monaco.languages.CompletionItemKind.Snippet,
+                                insertText: snippet.insertText,
+                                insertTextRules: snippetRule,
+                                detail: snippet.detail,
+                                documentation: snippet.documentation || snippet.detail,
+                                range,
+                                sortText: '0' + index
+                            }))
+                        };
+                    }
+                });
+            });
+
+            monaco.languages.registerCompletionItemProvider('html', {
+                triggerCharacters: ['!'],
+                provideCompletionItems: (model, position) => {
+                    const range = new monaco.Range(position.lineNumber, Math.max(1, position.column - 1), position.lineNumber, position.column);
+                    return {
+                        suggestions: [
+                            {
+                                label: 'HTML5 Boilerplate',
+                                kind: monaco.languages.CompletionItemKind.Snippet,
+                                insertText: '<!DOCTYPE html>\n<html lang="en">\n<head>\n    <meta charset="UTF-8">\n    <meta name="viewport" content="width=device-width, initial-scale=1.0">\n    <title>${1:Document}</title>\n</head>\n<body>\n    ${2:<!-- content -->}\n</body>\n</html>',
+                                insertTextRules: snippetRule,
+                                detail: 'Generate HTML boilerplate',
+                                documentation: 'Type ! then press Tab to expand',
+                                filterText: '!',
+                                range
+                            }
+                        ]
+                    };
+                }
+            });
         }
 
         function renderTabs() {
@@ -1011,7 +1381,32 @@
         function runCode(code, language) {
             const output = document.getElementById('outputContent');
 
-            if (language === 'python') {
+            const runJavaScriptCode = (transformedCode) => {
+                output.innerHTML = '<pre style="margin: 0; color: var(--text-primary);"></pre>';
+                const pre = output.querySelector('pre');
+                const originalLog = console.log;
+                const originalError = console.error;
+                const logs = [];
+                console.log = (...args) => {
+                    logs.push(args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)).join(' '));
+                };
+                console.error = (...args) => {
+                    logs.push('Error: ' + args.join(' '));
+                };
+                try {
+                    eval(transformedCode);
+                    pre.textContent = logs.length > 0 ? logs.join('\n') : 'Program executed successfully with no output.';
+                    if (logs.length === 0) pre.style.color = 'var(--success)';
+                } catch (err) {
+                    pre.textContent = 'Runtime Error: ' + err.message;
+                    pre.style.color = 'var(--error)';
+                } finally {
+                    console.log = originalLog;
+                    console.error = originalError;
+                }
+            };
+
+            if (language === 'python' || language === 'pypy') {
                 output.innerHTML = '<pre style="margin: 0; color: var(--text-primary);"></pre>';
                 const pre = output.querySelector('pre');
 
@@ -1039,32 +1434,62 @@
                     });
 
             } else if (language === 'javascript') {
+                runJavaScriptCode(code);
+
+            } else if (language === 'typescript') {
+                try {
+                    const transpiled = ts.transpileModule(code, {
+                        compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2019 }
+                    }).outputText;
+                    runJavaScriptCode(transpiled);
+                } catch (err) {
+                    output.innerHTML = '<pre style="margin: 0; color: var(--error);"></pre>';
+                    output.querySelector('pre').textContent = 'Transpile Error: ' + err.message;
+                }
+
+            } else if (language === 'react') {
+                try {
+                    const transformed = Babel.transform(code, { presets: ['env', 'react'] }).code;
+                    runJavaScriptCode(transformed);
+                } catch (err) {
+                    output.innerHTML = '<pre style="margin: 0; color: var(--error);"></pre>';
+                    output.querySelector('pre').textContent = 'Babel Error: ' + err.message;
+                }
+
+            } else if (language === 'markdown') {
+                try {
+                    const html = marked.parse(code || '');
+                    output.innerHTML = '<iframe id="output-iframe"></iframe>';
+                    const iframe = output.querySelector('iframe');
+                    iframe.srcdoc = `<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{font-family:Segoe UI,SegoeUI,Helvetica,Arial,sans-serif;padding:20px;max-width:900px;margin:auto;line-height:1.6}pre{background:#f5f5f5;padding:12px;border-radius:6px;overflow:auto}</style></head><body>${html}</body></html>`;
+                } catch (err) {
+                    output.innerHTML = '<pre style="margin: 0; color: var(--error);"></pre>';
+                    output.querySelector('pre').textContent = 'Markdown Error: ' + err.message;
+                }
+
+            } else if (language === 'json') {
                 output.innerHTML = '<pre style="margin: 0; color: var(--text-primary);"></pre>';
                 const pre = output.querySelector('pre');
-
-                const originalLog = console.log;
-                const originalError = console.error;
-                const logs = [];
-
-                console.log = (...args) => {
-                    logs.push(args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)).join(' '));
-                };
-
-                console.error = (...args) => {
-                    logs.push('Error: ' + args.join(' '));
-                };
-
                 try {
-                    eval(code);
-                    pre.textContent = logs.length > 0 ? logs.join('\n') : 'Program executed successfully with no output.';
-                    if (logs.length === 0) pre.style.color = 'var(--success)';
+                    const data = JSON.parse(code || 'null');
+                    pre.textContent = JSON.stringify(data, null, 2);
+                    pre.style.color = 'var(--success)';
                 } catch (err) {
-                    pre.textContent = 'Error: ' + err.message;
+                    pre.textContent = 'JSON Error: ' + err.message;
                     pre.style.color = 'var(--error)';
                 }
 
-                console.log = originalLog;
-                console.error = originalError;
+            } else if (language === 'yaml') {
+                output.innerHTML = '<pre style="margin: 0; color: var(--text-primary);"></pre>';
+                const pre = output.querySelector('pre');
+                try {
+                    const data = jsyaml.load(code || '');
+                    pre.textContent = JSON.stringify(data, null, 2);
+                    pre.style.color = 'var(--success)';
+                } catch (err) {
+                    pre.textContent = 'YAML Error: ' + err.message;
+                    pre.style.color = 'var(--error)';
+                }
 
             } else if (language === 'html' || language === 'css') {
                 let htmlContent = '';
@@ -1078,6 +1503,10 @@
                 output.innerHTML = '<iframe id="output-iframe"></iframe>';
                 const iframe = output.querySelector('iframe');
                 iframe.srcdoc = htmlContent;
+
+            } else {
+                output.innerHTML = '<pre style="margin: 0; color: var(--warning);"></pre>';
+                output.querySelector('pre').textContent = `Running code for ${language.toUpperCase()} is not supported yet. Use Download to export your project.`;
             }
         }
 
@@ -1090,7 +1519,14 @@
         });
 
         document.getElementById('languageSelector').addEventListener('change', (e) => {
-            monaco.editor.setModelLanguage(editor.getModel(), e.target.value);
+            const lang = e.target.value;
+            const monacoLang = getMonacoLanguage(lang);
+            monaco.editor.setModelLanguage(editor.getModel(), monacoLang);
+            if (currentFile) {
+                const file = getNodeByPath(currentFile);
+                file.language = lang;
+                saveToLocalStorage();
+            }
         });
 
         document.getElementById('themeSelector').addEventListener('change', (e) => {
@@ -1126,6 +1562,67 @@
             a.click();
             URL.revokeObjectURL(url);
             showStatus('HTML file downloaded successfully!');
+        });
+
+        document.getElementById('uploadBtn').addEventListener('click', () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.multiple = true;
+            input.addEventListener('change', async (e) => {
+                const files = Array.from(e.target.files || []);
+                if (files.length === 0) return;
+                const targetFolder = selectedFolder ? getNodeByPath(selectedFolder) : fileSystem;
+                for (const f of files) {
+                    try {
+                        const text = await f.text();
+                        const language = detectLanguage(f.name);
+                        targetFolder.children.push({ type: 'file', name: f.name, content: text, language });
+                    } catch (_) {}
+                }
+                saveToLocalStorage();
+                renderFileExplorer();
+                showStatus('Files uploaded.');
+            });
+            input.click();
+        });
+
+        document.getElementById('formatBtn').addEventListener('click', () => {
+            if (!editor) return;
+            const code = editor.getValue();
+            const lang = document.getElementById('languageSelector').value;
+            let parser = null;
+            if (lang === 'javascript') parser = 'babel';
+            else if (lang === 'react') parser = 'babel';
+            else if (lang === 'typescript') parser = 'typescript';
+            else if (lang === 'html') parser = 'html';
+            else if (lang === 'css') parser = 'css';
+            else if (lang === 'json') parser = 'json';
+            else if (lang === 'markdown') parser = 'markdown';
+            else if (lang === 'yaml') parser = 'yaml';
+            if (!parser) {
+                showStatus('Formatter not available for this language.', true);
+                return;
+            }
+            try {
+                const formatted = prettier.format(code, {
+                    parser,
+                    plugins: [
+                        prettierPlugins.babel,
+                        prettierPlugins.typescript,
+                        prettierPlugins.html,
+                        prettierPlugins.postcss,
+                        prettierPlugins.markdown,
+                        prettierPlugins.yaml
+                    ].filter(Boolean),
+                    tabWidth: 2,
+                    useTabs: false,
+                    singleQuote: true
+                });
+                editor.setValue(formatted);
+                showStatus('Formatted.');
+            } catch (err) {
+                showStatus('Format error: ' + err.message, true);
+            }
         });
 
         window.addEventListener('beforeunload', () => {
