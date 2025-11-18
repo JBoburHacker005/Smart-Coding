@@ -269,6 +269,47 @@
             color: #f7df1e;
         }
 
+        .file-icon.cpp {
+            color: #00599c;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 2px;
+        }
+
+        .file-icon.cpp::after {
+            content: 'X';
+            font-weight: bold;
+            font-size: 11px;
+            color: #00599c;
+            line-height: 1;
+        }
+
+        .file-icon.c {
+            color: #00599c;
+        }
+
+        .file-icon.java {
+            color: #ed8b00;
+        }
+
+        .file-icon.rust {
+            color: #000000;
+        }
+
+        .file-icon.go {
+            color: #00add8;
+        }
+
+        .file-icon.php {
+            color: #777bb4;
+        }
+
         .file-tree-item > .expand-icon {
             font-size: 10px;
             transition: transform 0.2s;
@@ -776,13 +817,67 @@
                         container.appendChild(children);
                         renderTreeNode(child, children, childPath);
                     } else {
-                        const ext = child.name.split('.').pop();
-                        const iconClass = ext === 'py' ? 'python' : ext === 'html' ? 'html' : ext === 'css' ? 'css' : ext === 'js' ? 'js' : '';
-                        const icon = ext === 'py' ? 'fa-python' : ext === 'html' ? 'fa-html5' : ext === 'css' ? 'fa-css3-alt' : ext === 'js' ? 'fa-js' : 'fa-file-code';
+                        const ext = child.name.split('.').pop().toLowerCase();
+                        let iconClass = '';
+                        let icon = 'fa-file-code';
+                        
+                        if (ext === 'py') {
+                            iconClass = 'python';
+                            icon = 'fa-python';
+                        } else if (ext === 'html' || ext === 'htm') {
+                            iconClass = 'html';
+                            icon = 'fa-html5';
+                        } else if (ext === 'css') {
+                            iconClass = 'css';
+                            icon = 'fa-css3-alt';
+                        } else if (ext === 'js' || ext === 'jsx' || ext === 'mjs' || ext === 'cjs') {
+                            iconClass = 'js';
+                            icon = 'fa-js';
+                        } else if (ext === 'cpp' || ext === 'cc' || ext === 'cxx' || ext === 'hpp' || ext === 'hh') {
+                            iconClass = 'cpp';
+                            icon = '';
+                        } else if (ext === 'c' || ext === 'h') {
+                            iconClass = 'c';
+                            icon = 'fa-file-code';
+                        } else if (ext === 'java') {
+                            iconClass = 'java';
+                            icon = 'fa-java';
+                        } else if (ext === 'rs') {
+                            iconClass = 'rust';
+                            icon = 'fa-rust';
+                        } else if (ext === 'go') {
+                            iconClass = 'go';
+                            icon = 'fa-file-code';
+                        } else if (ext === 'php') {
+                            iconClass = 'php';
+                            icon = 'fa-php';
+                        } else if (ext === 'ts' || ext === 'tsx') {
+                            iconClass = 'js';
+                            icon = 'fa-file-code';
+                        } else if (ext === 'kt' || ext === 'kts') {
+                            iconClass = 'java';
+                            icon = 'fa-file-code';
+                        } else if (ext === 'cs') {
+                            iconClass = 'c';
+                            icon = 'fa-file-code';
+                        } else if (ext === 'rb') {
+                            iconClass = 'js';
+                            icon = 'fa-gem';
+                        } else if (ext === 'swift') {
+                            iconClass = 'js';
+                            icon = 'fa-file-code';
+                        } else if (ext === 'dart') {
+                            iconClass = 'js';
+                            icon = 'fa-file-code';
+                        } else if (ext === 'hs') {
+                            iconClass = 'js';
+                            icon = 'fa-file-code';
+                        }
 
+                        const iconHtml = icon ? `<i class="fab ${icon}"></i>` : '';
                         item.innerHTML = `
                             <span class="expand-icon"></span>
-                            <span class="file-icon ${iconClass}"><i class="fab ${icon}"></i></span>
+                            <span class="file-icon ${iconClass}">${iconHtml}</span>
                             <span class="file-name">${child.name}</span>
                         `;
 
@@ -1154,12 +1249,66 @@
                 tabEl.className = 'tab';
                 
                 const file = getNodeByPath(tab.path);
-                const ext = file.name.split('.').pop();
-                const iconClass = ext === 'py' ? 'python' : ext === 'html' ? 'html' : ext === 'css' ? 'css' : ext === 'js' ? 'js' : '';
-                const icon = ext === 'py' ? 'fa-python' : ext === 'html' ? 'fa-html5' : ext === 'css' ? 'fa-css3-alt' : ext === 'js' ? 'fa-js' : 'fa-file-code';
+                const ext = file.name.split('.').pop().toLowerCase();
+                let iconClass = '';
+                let icon = 'fa-file-code';
+                
+                if (ext === 'py') {
+                    iconClass = 'python';
+                    icon = 'fa-python';
+                } else if (ext === 'html' || ext === 'htm') {
+                    iconClass = 'html';
+                    icon = 'fa-html5';
+                } else if (ext === 'css') {
+                    iconClass = 'css';
+                    icon = 'fa-css3-alt';
+                } else if (ext === 'js' || ext === 'jsx' || ext === 'mjs' || ext === 'cjs') {
+                    iconClass = 'js';
+                    icon = 'fa-js';
+                } else if (ext === 'cpp' || ext === 'cc' || ext === 'cxx' || ext === 'hpp' || ext === 'hh') {
+                    iconClass = 'cpp';
+                    icon = '';
+                } else if (ext === 'c' || ext === 'h') {
+                    iconClass = 'c';
+                    icon = 'fa-file-code';
+                } else if (ext === 'java') {
+                    iconClass = 'java';
+                    icon = 'fa-java';
+                } else if (ext === 'rs') {
+                    iconClass = 'rust';
+                    icon = 'fa-rust';
+                } else if (ext === 'go') {
+                    iconClass = 'go';
+                    icon = 'fa-file-code';
+                } else if (ext === 'php') {
+                    iconClass = 'php';
+                    icon = 'fa-php';
+                } else if (ext === 'ts' || ext === 'tsx') {
+                    iconClass = 'js';
+                    icon = 'fa-file-code';
+                } else if (ext === 'kt' || ext === 'kts') {
+                    iconClass = 'java';
+                    icon = 'fa-file-code';
+                } else if (ext === 'cs') {
+                    iconClass = 'c';
+                    icon = 'fa-file-code';
+                } else if (ext === 'rb') {
+                    iconClass = 'js';
+                    icon = 'fa-gem';
+                } else if (ext === 'swift') {
+                    iconClass = 'js';
+                    icon = 'fa-file-code';
+                } else if (ext === 'dart') {
+                    iconClass = 'js';
+                    icon = 'fa-file-code';
+                } else if (ext === 'hs') {
+                    iconClass = 'js';
+                    icon = 'fa-file-code';
+                }
 
+                const iconHtml = icon ? `<i class="fab ${icon}"></i>` : '';
                 tabEl.innerHTML = `
-                    <span class="file-icon ${iconClass}"><i class="fab ${icon}"></i></span>
+                    <span class="file-icon ${iconClass}">${iconHtml}</span>
                     <span>${tab.name}</span>
                     <span class="tab-close"><i class="fas fa-times"></i></span>
                 `;
@@ -1505,8 +1654,68 @@
                 iframe.srcdoc = htmlContent;
 
             } else {
-                output.innerHTML = '<pre style="margin: 0; color: var(--warning);"></pre>';
-                output.querySelector('pre').textContent = `Running code for ${language.toUpperCase()} is not supported yet. Use Download to export your project.`;
+                // Use Piston API for compiled languages
+                output.innerHTML = '<pre style="margin: 0; color: var(--text-primary);">Compiling and running...</pre>';
+                const pre = output.querySelector('pre');
+                
+                const languageMap = {
+                    'cpp': 'cpp',
+                    'c': 'c',
+                    'java': 'java',
+                    'rust': 'rust',
+                    'go': 'go',
+                    'csharp': 'c#',
+                    'php': 'php',
+                    'pascal': 'pascal',
+                    'pascalabc': 'pascal',
+                    'kotlin': 'kotlin',
+                    'ruby': 'ruby',
+                    'swift': 'swift',
+                    'dart': 'dart',
+                    'haskell': 'haskell'
+                };
+                
+                const pistonLanguage = languageMap[language] || language;
+                
+                // Use Piston API (free, no auth required)
+                fetch('https://emkc.org/api/v2/piston/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        language: pistonLanguage,
+                        version: '*',
+                        files: [{
+                            content: code
+                        }]
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.run) {
+                        if (data.run.stdout) {
+                            pre.textContent = data.run.stdout;
+                            pre.style.color = 'var(--text-primary)';
+                        } else if (data.run.stderr) {
+                            pre.textContent = data.run.stderr;
+                            pre.style.color = 'var(--error)';
+                        } else {
+                            pre.textContent = 'Program executed successfully with no output.';
+                            pre.style.color = 'var(--success)';
+                        }
+                    } else if (data.compile && data.compile.stderr) {
+                        pre.textContent = 'Compilation Error:\n' + data.compile.stderr;
+                        pre.style.color = 'var(--error)';
+                    } else {
+                        pre.textContent = 'Error: ' + JSON.stringify(data);
+                        pre.style.color = 'var(--error)';
+                    }
+                })
+                .catch(err => {
+                    pre.textContent = 'Error executing code: ' + err.message + '\n\nMake sure you have an internet connection.';
+                    pre.style.color = 'var(--error)';
+                });
             }
         }
 
