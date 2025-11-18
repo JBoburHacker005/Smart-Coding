@@ -155,6 +155,12 @@
             border: none;
         }
 
+        .btn-warning {
+            background: var(--warning);
+            color: #1e1e1e;
+            border: none;
+        }
+
         .btn-danger {
             background: var(--error);
             color: white;
@@ -271,29 +277,10 @@
             color: #f7df1e;
         }
 
-        .file-icon.cpp {
-            color: #00599c;
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 16px;
-            height: 16px;
-            background: white;
-            border: 1px solid #e0e0e0;
-            border-radius: 2px;
-        }
-
-        .file-icon.cpp::after {
-            content: 'X';
-            font-weight: bold;
-            font-size: 11px;
-            color: #00599c;
-            line-height: 1;
-        }
-
+        .file-icon.cpp,
         .file-icon.c {
             color: #00599c;
+            font-weight: bold;
         }
 
         .file-icon.java {
@@ -455,6 +442,109 @@
             display: flex;
             gap: 10px;
             margin-top: 10px;
+        }
+
+        .debug-panel {
+            background: var(--bg-tertiary);
+            border-top: 1px solid var(--border-color);
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-height: 160px;
+        }
+
+        .debug-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .debug-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .debug-controls button {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        .debug-controls button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .debug-status {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .debug-breakpoints h4,
+        .debug-variables h4 {
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 4px;
+            color: var(--text-secondary);
+        }
+
+        .debug-breakpoints ul {
+            list-style: none;
+            padding-left: 0;
+            font-size: 12px;
+            max-height: 80px;
+            overflow: auto;
+        }
+
+        .debug-variables {
+            font-size: 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 8px;
+            max-height: 120px;
+            overflow: auto;
+            white-space: pre-wrap;
+        }
+
+        .debug-log {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 8px;
+            font-size: 12px;
+            max-height: 120px;
+            overflow: auto;
+        }
+
+        .breakpoint-glyph {
+            width: 12px;
+            height: 12px;
+            background: var(--error);
+            border-radius: 50%;
+        }
+
+        .active-debug-line {
+            background: rgba(255, 152, 0, 0.2) !important;
+        }
+
+        .monaco-editor .view-overlays .active-debug-line {
+            background: rgba(255, 152, 0, 0.2) !important;
+        }
+
+        .file-icon-text {
+            font-size: 10px;
+            font-weight: 700;
+            display: inline-block;
+            min-width: 16px;
+            text-align: center;
+            color: inherit;
         }
 
         #output-iframe {
@@ -669,6 +759,7 @@
         </div>
         <div class="navbar-center">
             <button id="runBtn" class="btn-success"><i class="fas fa-play"></i> Run</button>
+            <button id="debugBtn" class="btn-warning"><i class="fas fa-bug"></i> Debug</button>
             <button id="clearBtn"><i class="fas fa-eraser"></i> Clear</button>
             <button id="saveBtn" class="btn-primary"><i class="fas fa-save"></i> Save</button>
             <button id="formatBtn"><i class="fas fa-wand-magic-sparkles"></i> Format</button>
@@ -716,6 +807,29 @@
                     Run your code to see output here
                 </div>
             </div>
+            <div class="debug-panel">
+                <div class="debug-header">
+                    <span>DEBUGGER</span>
+                    <div class="debug-controls">
+                        <button id="debugStepBtn" disabled>Step</button>
+                        <button id="debugContinueBtn" disabled>Continue</button>
+                        <button id="debugStopBtn" disabled>Stop</button>
+                    </div>
+                </div>
+                <div class="debug-status" id="debugStatus">No active debugging session.</div>
+                <div class="debug-breakpoints">
+                    <h4>Breakpoints</h4>
+                    <ul id="breakpointList"></ul>
+                </div>
+                <div class="debug-variables-container">
+                    <h4 style="font-size:12px; color: var(--text-secondary); margin-bottom:4px;">Variables</h4>
+                    <div class="debug-variables" id="debugVariables">No data.</div>
+                </div>
+                <div>
+                    <h4 style="font-size:12px; color: var(--text-secondary); margin-bottom:4px;">Debug Log</h4>
+                    <div class="debug-log" id="debugLog">Logs will appear here during debugging.</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -749,6 +863,8 @@
     <script src="https://unpkg.com/prettier@3.3.3/parser-typescript.js"></script>
     <script src="https://unpkg.com/prettier@3.3.3/parser-markdown.js"></script>
     <script src="https://unpkg.com/prettier@3.3.3/parser-yaml.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-interpreter@latest/acorn.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-interpreter@latest/interpreter.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/skulpt@1.2.0/dist/skulpt-stdlib.js"></script>
 
@@ -762,8 +878,24 @@
             name: 'root',
             children: []
         };
+        let breakpoints = new Set();
+        let breakpointDecorations = [];
+        let debugLineDecorations = [];
+        let debugSession = null;
+        let debugLogEntries = [];
 
         require.config({ paths: { vs: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
+
+        const debugElements = {
+            stepBtn: document.getElementById('debugStepBtn'),
+            continueBtn: document.getElementById('debugContinueBtn'),
+            stopBtn: document.getElementById('debugStopBtn'),
+            status: document.getElementById('debugStatus'),
+            log: document.getElementById('debugLog'),
+            variables: document.getElementById('debugVariables'),
+            breakpointList: document.getElementById('breakpointList')
+        };
+        resetDebugPanel();
 
         require(['vs/editor/editor.main'], function () {
             editor = monaco.editor.create(document.getElementById('editor'), {
@@ -775,6 +907,7 @@
                 automaticLayout: true,
                 scrollBeyondLastLine: false,
                 wordWrap: 'on',
+                glyphMargin: true,
                 tabCompletion: 'on',
                 quickSuggestions: { other: true, comments: false, strings: true },
                 suggestOnTriggerCharacters: true,
@@ -786,6 +919,7 @@
             });
 
             setupCompletions();
+            setupBreakpointEvents();
             loadFromLocalStorage();
             renderFileExplorer();
             updateTheme();
@@ -861,67 +995,10 @@
                         container.appendChild(children);
                         renderTreeNode(child, children, childPath);
                     } else {
-                        const ext = child.name.split('.').pop().toLowerCase();
-                        let iconClass = '';
-                        let icon = 'fa-file-code';
-                        
-                        if (ext === 'py') {
-                            iconClass = 'python';
-                            icon = 'fa-python';
-                        } else if (ext === 'html' || ext === 'htm') {
-                            iconClass = 'html';
-                            icon = 'fa-html5';
-                        } else if (ext === 'css') {
-                            iconClass = 'css';
-                            icon = 'fa-css3-alt';
-                        } else if (ext === 'js' || ext === 'jsx' || ext === 'mjs' || ext === 'cjs') {
-                            iconClass = 'js';
-                            icon = 'fa-js';
-                        } else if (ext === 'cpp' || ext === 'cc' || ext === 'cxx' || ext === 'hpp' || ext === 'hh') {
-                            iconClass = 'cpp';
-                            icon = '';
-                        } else if (ext === 'c' || ext === 'h') {
-                            iconClass = 'c';
-                            icon = 'fa-file-code';
-                        } else if (ext === 'java') {
-                            iconClass = 'java';
-                            icon = 'fa-java';
-                        } else if (ext === 'rs') {
-                            iconClass = 'rust';
-                            icon = 'fa-rust';
-                        } else if (ext === 'go') {
-                            iconClass = 'go';
-                            icon = 'fa-file-code';
-                        } else if (ext === 'php') {
-                            iconClass = 'php';
-                            icon = 'fa-php';
-                        } else if (ext === 'ts' || ext === 'tsx') {
-                            iconClass = 'js';
-                            icon = 'fa-file-code';
-                        } else if (ext === 'kt' || ext === 'kts') {
-                            iconClass = 'java';
-                            icon = 'fa-file-code';
-                        } else if (ext === 'cs') {
-                            iconClass = 'c';
-                            icon = 'fa-file-code';
-                        } else if (ext === 'rb') {
-                            iconClass = 'js';
-                            icon = 'fa-gem';
-                        } else if (ext === 'swift') {
-                            iconClass = 'js';
-                            icon = 'fa-file-code';
-                        } else if (ext === 'dart') {
-                            iconClass = 'js';
-                            icon = 'fa-file-code';
-                        } else if (ext === 'hs') {
-                            iconClass = 'js';
-                            icon = 'fa-file-code';
-                        }
-
-                        const iconHtml = icon ? `<i class="fab ${icon}"></i>` : '';
+                        const iconMeta = getIconMeta(child.name);
                         item.innerHTML = `
                             <span class="expand-icon"></span>
-                            <span class="file-icon ${iconClass}">${iconHtml}</span>
+                            <span class="file-icon ${iconMeta.className}">${iconMeta.html}</span>
                             <span class="file-name">${child.name}</span>
                         `;
 
@@ -1032,6 +1109,50 @@
                 haskell: 'plaintext'
             };
             return map[language] || language;
+        }
+
+        function getIconMeta(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const config = {
+                py: { prefix: 'fab', icon: 'fa-python', className: 'python' },
+                html: { prefix: 'fab', icon: 'fa-html5', className: 'html' },
+                htm: { prefix: 'fab', icon: 'fa-html5', className: 'html' },
+                css: { prefix: 'fab', icon: 'fa-css3-alt', className: 'css' },
+                js: { prefix: 'fab', icon: 'fa-js', className: 'js' },
+                jsx: { prefix: 'fab', icon: 'fa-react', className: 'js' },
+                ts: { prefix: 'fas', icon: 'fa-code', className: 'js', label: 'TS' },
+                tsx: { prefix: 'fab', icon: 'fa-react', className: 'js' },
+                cpp: { label: 'C++', className: 'cpp' },
+                cc: { label: 'C++', className: 'cpp' },
+                cxx: { label: 'C++', className: 'cpp' },
+                hpp: { label: 'C++', className: 'cpp' },
+                hh: { label: 'C++', className: 'cpp' },
+                c: { label: 'C', className: 'c' },
+                h: { label: 'C', className: 'c' },
+                java: { prefix: 'fab', icon: 'fa-java', className: 'java' },
+                kt: { label: 'Kt', className: 'java' },
+                kts: { label: 'Kt', className: 'java' },
+                cs: { label: 'C#', className: 'c' },
+                php: { prefix: 'fab', icon: 'fa-php', className: 'php' },
+                go: { label: 'Go', className: 'go' },
+                rb: { prefix: 'fas', icon: 'fa-gem', className: 'ruby' },
+                swift: { prefix: 'fab', icon: 'fa-swift', className: 'js' },
+                rs: { label: 'Rs', className: 'rust' },
+                dart: { label: 'D', className: 'js' },
+                md: { prefix: 'fas', icon: 'fa-book', className: 'markdown' },
+                json: { prefix: 'fas', icon: 'fa-code', className: 'js' },
+                yaml: { prefix: 'fas', icon: 'fa-code', className: 'js' },
+                yml: { prefix: 'fas', icon: 'fa-code', className: 'js' },
+                txt: { prefix: 'fas', icon: 'fa-file-alt', className: 'plaintext' }
+            };
+            const meta = config[ext] || { prefix: 'fas', icon: 'fa-file-code', className: '' };
+            let html = '';
+            if (meta.label) {
+                html = `<span class="file-icon-text">${meta.label}</span>`;
+            } else {
+                html = `<i class="${meta.prefix} ${meta.icon}"></i>`;
+            }
+            return { className: meta.className || '', html };
         }
 
         function setupCompletions() {
@@ -1275,6 +1396,307 @@
             });
         }
 
+        function setupBreakpointEvents() {
+            editor.onMouseDown((e) => {
+                if (e.target.type === monaco.editor.MouseTargetType.GUTTER_GLYPH_MARGIN && e.target.position) {
+                    toggleBreakpoint(e.target.position.lineNumber);
+                }
+            });
+        }
+
+        function toggleBreakpoint(lineNumber) {
+            if (breakpoints.has(lineNumber)) {
+                breakpoints.delete(lineNumber);
+            } else {
+                breakpoints.add(lineNumber);
+            }
+            updateBreakpointDecorations();
+            updateBreakpointList();
+            if (debugSession) {
+                debugSession.breakpoints = new Set([...breakpoints]);
+            }
+        }
+
+        function updateBreakpointDecorations() {
+            if (!editor) return;
+            const decorations = Array.from(breakpoints).map(line => ({
+                range: new monaco.Range(line, 1, line, 1),
+                options: {
+                    glyphMarginClassName: 'breakpoint-glyph',
+                    stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+                    glyphMarginHoverMessage: { value: `Breakpoint at line ${line}` }
+                }
+            }));
+            breakpointDecorations = editor.deltaDecorations(breakpointDecorations, decorations);
+        }
+
+        function updateBreakpointList() {
+            if (!debugElements.breakpointList) return;
+            debugElements.breakpointList.innerHTML = '';
+            const sorted = Array.from(breakpoints).sort((a, b) => a - b);
+            if (sorted.length === 0) {
+                const li = document.createElement('li');
+                li.textContent = 'No breakpoints.';
+                debugElements.breakpointList.appendChild(li);
+                return;
+            }
+            sorted.forEach(line => {
+                const li = document.createElement('li');
+                li.textContent = `Line ${line}`;
+                debugElements.breakpointList.appendChild(li);
+            });
+        }
+
+        function highlightDebugLine(lineNumber) {
+            if (!editor) return;
+            if (!lineNumber) {
+                clearDebugLineHighlight();
+                return;
+            }
+            debugLineDecorations = editor.deltaDecorations(debugLineDecorations, [
+                {
+                    range: new monaco.Range(lineNumber, 1, lineNumber, 1),
+                    options: {
+                        isWholeLine: true,
+                        className: 'active-debug-line'
+                    }
+                }
+            ]);
+            editor.revealLineInCenter(lineNumber);
+        }
+
+        function clearDebugLineHighlight() {
+            if (!editor) return;
+            debugLineDecorations = editor.deltaDecorations(debugLineDecorations, []);
+        }
+
+        function updateDebugStatus(text) {
+            if (debugElements.status) {
+                debugElements.status.textContent = text;
+            }
+        }
+
+        function appendDebugLog(message) {
+            debugLogEntries.push(`[${new Date().toLocaleTimeString()}] ${message}`);
+            if (debugLogEntries.length > 200) {
+                debugLogEntries.shift();
+            }
+            if (debugElements.log) {
+                debugElements.log.textContent = debugLogEntries.join('\n');
+                debugElements.log.scrollTop = debugElements.log.scrollHeight;
+            }
+        }
+
+        function updateDebugControls() {
+            const active = !!debugSession;
+            const paused = active ? debugSession.paused : false;
+            const finished = active ? debugSession.finished : true;
+            if (debugElements.stepBtn) {
+                debugElements.stepBtn.disabled = !active || finished;
+            }
+            if (debugElements.continueBtn) {
+                debugElements.continueBtn.disabled = !active || finished || !paused;
+            }
+            if (debugElements.stopBtn) {
+                debugElements.stopBtn.disabled = !active;
+            }
+        }
+
+        function resetDebugPanel() {
+            debugLogEntries = [];
+            appendDebugLog('Debugger ready.');
+            updateDebugStatus('No active debugging session.');
+            if (debugElements.variables) {
+                debugElements.variables.textContent = 'No data.';
+            }
+            clearDebugLineHighlight();
+            updateDebugControls();
+        }
+
+        function captureDebuggerVariables() {
+            if (!debugElements.variables) return;
+            if (!debugSession) {
+                debugElements.variables.textContent = 'No data.';
+                return;
+            }
+            const interpreter = debugSession.interpreter;
+            if (!interpreter) {
+                debugElements.variables.textContent = 'No data.';
+                return;
+            }
+            const props = interpreter.globalObject.properties || {};
+            const entries = [];
+            Object.keys(props).forEach(key => {
+                if (['console'].includes(key)) return;
+                try {
+                    const native = interpreter.pseudoToNative(props[key]);
+                    entries.push(`${key}: ${typeof native === 'object' ? JSON.stringify(native, null, 2) : native}`);
+                } catch {
+                    entries.push(`${key}: [unavailable]`);
+                }
+            });
+            debugElements.variables.textContent = entries.length ? entries.join('\n') : 'No variables captured yet.';
+        }
+
+        function stopDebugSession(logMessage = true) {
+            if (debugSession && logMessage) {
+                appendDebugLog('Debugger stopped.');
+            }
+            debugSession = null;
+            clearDebugLineHighlight();
+            updateDebugControls();
+        }
+
+        function startDebugging() {
+            const language = document.getElementById('languageSelector').value;
+            const code = editor.getValue();
+            if (!code.trim()) {
+                showStatus('No code to debug.', true);
+                return;
+            }
+            if (!['javascript', 'typescript', 'react'].includes(language)) {
+                showStatus('Interactive debugger currently supports JavaScript, TypeScript, and React.', true);
+                updateDebugStatus('Interactive debugger not available for this language. Use Run for output-based debugging.');
+                runCode(code, language);
+                return;
+            }
+            stopDebugSession(false);
+            startJavaScriptDebugSession(code, language);
+        }
+
+        function startJavaScriptDebugSession(code, language) {
+            resetDebugPanel();
+            let transformed = code;
+            try {
+                if (language === 'typescript') {
+                    transformed = ts.transpileModule(code, {
+                        compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2019 }
+                    }).outputText;
+                } else if (language === 'react') {
+                    transformed = Babel.transform(code, { presets: ['env', 'react'] }).code;
+                }
+            } catch (err) {
+                showStatus('Debug transform failed: ' + err.message, true);
+                updateDebugStatus('Failed to prepare code for debugging.');
+                return;
+            }
+
+            const lineMap = buildLineMap(transformed);
+            try {
+                const interpreter = new Interpreter(transformed, function(interpreter, globalObject) {
+                    const consoleObj = interpreter.nativeToPseudo({
+                        log: function() {
+                            const args = Array.from(arguments).map(arg => interpreter.pseudoToNative(arg));
+                            appendDebugLog(args.join(' '));
+                        }
+                    });
+                    interpreter.setProperty(globalObject, 'console', consoleObj);
+                }, { ecmaVersion: 2020, allowReturnOutsideFunction: true });
+
+                debugSession = {
+                    interpreter,
+                    language,
+                    breakpoints: new Set([...breakpoints]),
+                    paused: false,
+                    finished: false,
+                    lineMap
+                };
+                appendDebugLog('Debugger session started.');
+                updateDebugStatus('Debugger running...');
+                updateDebugControls();
+                runJavaScriptInterpreter(false);
+            } catch (err) {
+                showStatus('Debugger error: ' + err.message, true);
+                updateDebugStatus('Debugger failed to start.');
+                appendDebugLog('Error: ' + err.message);
+                debugSession = null;
+                updateDebugControls();
+            }
+        }
+
+        function buildLineMap(text) {
+            const lines = text.split('\n');
+            const map = [];
+            let total = 0;
+            for (let i = 0; i < lines.length; i++) {
+                map.push(total);
+                total += lines[i].length + 1;
+            }
+            return map;
+        }
+
+        function getLineFromIndex(index, map) {
+            for (let i = map.length - 1; i >= 0; i--) {
+                if (index >= map[i]) {
+                    return i + 1;
+                }
+            }
+            return 1;
+        }
+
+        function runJavaScriptInterpreter(stepOnce = false) {
+            if (!debugSession) return;
+            debugSession.paused = false;
+            updateDebugControls();
+            const interpreter = debugSession.interpreter;
+            let executedSteps = 0;
+            const stepLimit = 20000;
+
+            const step = () => {
+                if (!debugSession) return;
+                let hasMore = false;
+                try {
+                    hasMore = interpreter.step();
+                    executedSteps += 1;
+                } catch (err) {
+                    appendDebugLog('Runtime error: ' + err.message);
+                    updateDebugStatus('Runtime error: ' + err.message);
+                    stopDebugSession(false);
+                    return;
+                }
+
+                const stack = interpreter.stateStack;
+                const node = stack && stack.length ? stack[stack.length - 1].node : null;
+                const index = node && typeof node.start === 'number' ? node.start : 0;
+                const lineNumber = getLineFromIndex(index, debugSession.lineMap);
+                highlightDebugLine(lineNumber);
+                captureDebuggerVariables();
+
+                if (!hasMore) {
+                    appendDebugLog('Execution finished.');
+                    updateDebugStatus('Program finished.');
+                    debugSession.finished = true;
+                    stopDebugSession(false);
+                    return;
+                }
+
+                if (executedSteps > stepLimit) {
+                    appendDebugLog('Step limit reached. Stopping debugger to prevent hangs.');
+                    updateDebugStatus('Step limit reached.');
+                    stopDebugSession(false);
+                    return;
+                }
+
+                if (stepOnce) {
+                    debugSession.paused = true;
+                    updateDebugStatus(`Stepped to line ${lineNumber}`);
+                    updateDebugControls();
+                    return;
+                }
+
+                if (lineNumber && debugSession.breakpoints.has(lineNumber)) {
+                    debugSession.paused = true;
+                    updateDebugStatus(`Breakpoint hit at line ${lineNumber}`);
+                    updateDebugControls();
+                    return;
+                }
+
+                setTimeout(step, 0);
+            };
+
+            step();
+        }
+
         function renderTabs() {
             const container = document.getElementById('tabsContainer');
             container.innerHTML = '';
@@ -1293,66 +1715,10 @@
                 tabEl.className = 'tab';
                 
                 const file = getNodeByPath(tab.path);
-                const ext = file.name.split('.').pop().toLowerCase();
-                let iconClass = '';
-                let icon = 'fa-file-code';
-                
-                if (ext === 'py') {
-                    iconClass = 'python';
-                    icon = 'fa-python';
-                } else if (ext === 'html' || ext === 'htm') {
-                    iconClass = 'html';
-                    icon = 'fa-html5';
-                } else if (ext === 'css') {
-                    iconClass = 'css';
-                    icon = 'fa-css3-alt';
-                } else if (ext === 'js' || ext === 'jsx' || ext === 'mjs' || ext === 'cjs') {
-                    iconClass = 'js';
-                    icon = 'fa-js';
-                } else if (ext === 'cpp' || ext === 'cc' || ext === 'cxx' || ext === 'hpp' || ext === 'hh') {
-                    iconClass = 'cpp';
-                    icon = '';
-                } else if (ext === 'c' || ext === 'h') {
-                    iconClass = 'c';
-                    icon = 'fa-file-code';
-                } else if (ext === 'java') {
-                    iconClass = 'java';
-                    icon = 'fa-java';
-                } else if (ext === 'rs') {
-                    iconClass = 'rust';
-                    icon = 'fa-rust';
-                } else if (ext === 'go') {
-                    iconClass = 'go';
-                    icon = 'fa-file-code';
-                } else if (ext === 'php') {
-                    iconClass = 'php';
-                    icon = 'fa-php';
-                } else if (ext === 'ts' || ext === 'tsx') {
-                    iconClass = 'js';
-                    icon = 'fa-file-code';
-                } else if (ext === 'kt' || ext === 'kts') {
-                    iconClass = 'java';
-                    icon = 'fa-file-code';
-                } else if (ext === 'cs') {
-                    iconClass = 'c';
-                    icon = 'fa-file-code';
-                } else if (ext === 'rb') {
-                    iconClass = 'js';
-                    icon = 'fa-gem';
-                } else if (ext === 'swift') {
-                    iconClass = 'js';
-                    icon = 'fa-file-code';
-                } else if (ext === 'dart') {
-                    iconClass = 'js';
-                    icon = 'fa-file-code';
-                } else if (ext === 'hs') {
-                    iconClass = 'js';
-                    icon = 'fa-file-code';
-                }
+                const iconMeta = getIconMeta(file.name);
 
-                const iconHtml = icon ? `<i class="fab ${icon}"></i>` : '';
                 tabEl.innerHTML = `
-                    <span class="file-icon ${iconClass}">${iconHtml}</span>
+                    <span class="file-icon ${iconMeta.className}">${iconMeta.html}</span>
                     <span>${tab.name}</span>
                     <span class="tab-close"><i class="fas fa-times"></i></span>
                 `;
@@ -1571,8 +1937,23 @@
             runCode(code, language);
         });
 
+        document.getElementById('debugBtn').addEventListener('click', startDebugging);
+        debugElements.stepBtn.addEventListener('click', () => {
+            if (debugSession) {
+                runJavaScriptInterpreter(true);
+            }
+        });
+        debugElements.continueBtn.addEventListener('click', () => {
+            if (debugSession) {
+                runJavaScriptInterpreter(false);
+            }
+        });
+        debugElements.stopBtn.addEventListener('click', () => stopDebugSession());
+
         function runCode(code, language) {
             const output = document.getElementById('outputContent');
+            stopDebugSession(false);
+            updateDebugStatus('No active debugging session.');
 
             const runJavaScriptCode = (transformedCode) => {
                 output.innerHTML = '<pre style="margin: 0; color: var(--text-primary);"></pre>';
@@ -1936,6 +2317,8 @@
                 file.content = editor.getValue();
             }
         });
+
+        updateBreakpointList();
     </script>
 </body>
 </html>
