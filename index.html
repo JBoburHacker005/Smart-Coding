@@ -97,6 +97,8 @@
             width: 38px;
             height: 38px;
             object-fit: contain;
+            display: block;
+            flex-shrink: 0;
         }
 
         .logo-text {
@@ -411,6 +413,48 @@
             padding: 10px;
             font-family: 'Consolas', 'Monaco', monospace;
             font-size: 13px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-section {
+            margin-top: 10px;
+            padding: 10px;
+            background: var(--bg-tertiary);
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+        }
+
+        .input-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 8px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 3px;
+            color: var(--text-primary);
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 13px;
+            resize: vertical;
+            min-height: 60px;
+            box-sizing: border-box;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        .input-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
         }
 
         #output-iframe {
@@ -1655,67 +1699,111 @@
 
             } else {
                 // Use Piston API for compiled languages
-                output.innerHTML = '<pre style="margin: 0; color: var(--text-primary);">Compiling and running...</pre>';
+                const needsInput = code.includes('cin') || code.includes('scanf') || code.includes('input(') || code.includes('readLine') || code.includes('read_line');
+                
+                let outputHTML = '<pre style="margin: 0; color: var(--text-primary);">Compiling and running...</pre>';
+                
+                if (needsInput) {
+                    outputHTML += `
+                        <div class="input-section">
+                            <label class="input-label">Input (stdin):</label>
+                            <textarea class="input-field" id="stdinInput" placeholder="Enter input values here (one per line or space-separated)"></textarea>
+                            <div class="input-buttons">
+                                <button class="btn-primary" id="runWithInputBtn">Run with Input</button>
+                                <button id="clearInputBtn">Clear Input</button>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                output.innerHTML = outputHTML;
                 const pre = output.querySelector('pre');
                 
-                const languageMap = {
-                    'cpp': 'cpp',
-                    'c': 'c',
-                    'java': 'java',
-                    'rust': 'rust',
-                    'go': 'go',
-                    'csharp': 'c#',
-                    'php': 'php',
-                    'pascal': 'pascal',
-                    'pascalabc': 'pascal',
-                    'kotlin': 'kotlin',
-                    'ruby': 'ruby',
-                    'swift': 'swift',
-                    'dart': 'dart',
-                    'haskell': 'haskell'
-                };
-                
-                const pistonLanguage = languageMap[language] || language;
-                
-                // Use Piston API (free, no auth required)
-                fetch('https://emkc.org/api/v2/piston/execute', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        language: pistonLanguage,
-                        version: '*',
-                        files: [{
-                            content: code
-                        }]
+                const runWithInput = (stdin = '') => {
+                    const languageMap = {
+                        'cpp': 'cpp',
+                        'c': 'c',
+                        'java': 'java',
+                        'rust': 'rust',
+                        'go': 'go',
+                        'csharp': 'c#',
+                        'php': 'php',
+                        'pascal': 'pascal',
+                        'pascalabc': 'pascal',
+                        'kotlin': 'kotlin',
+                        'ruby': 'ruby',
+                        'swift': 'swift',
+                        'dart': 'dart',
+                        'haskell': 'haskell'
+                    };
+                    
+                    const pistonLanguage = languageMap[language] || language;
+                    
+                    if (pre) pre.textContent = 'Compiling and running...';
+                    
+                    // Use Piston API (free, no auth required)
+                    fetch('https://emkc.org/api/v2/piston/execute', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            language: pistonLanguage,
+                            version: '*',
+                            files: [{
+                                content: code
+                            }],
+                            stdin: stdin
+                        })
                     })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.run) {
-                        if (data.run.stdout) {
-                            pre.textContent = data.run.stdout;
-                            pre.style.color = 'var(--text-primary)';
-                        } else if (data.run.stderr) {
-                            pre.textContent = data.run.stderr;
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.run) {
+                            if (data.run.stdout) {
+                                pre.textContent = data.run.stdout;
+                                pre.style.color = 'var(--text-primary)';
+                            } else if (data.run.stderr) {
+                                pre.textContent = data.run.stderr;
+                                pre.style.color = 'var(--error)';
+                            } else {
+                                pre.textContent = 'Program executed successfully with no output.';
+                                pre.style.color = 'var(--success)';
+                            }
+                        } else if (data.compile && data.compile.stderr) {
+                            pre.textContent = 'Compilation Error:\n' + data.compile.stderr;
                             pre.style.color = 'var(--error)';
                         } else {
-                            pre.textContent = 'Program executed successfully with no output.';
-                            pre.style.color = 'var(--success)';
+                            pre.textContent = 'Error: ' + JSON.stringify(data);
+                            pre.style.color = 'var(--error)';
                         }
-                    } else if (data.compile && data.compile.stderr) {
-                        pre.textContent = 'Compilation Error:\n' + data.compile.stderr;
+                    })
+                    .catch(err => {
+                        pre.textContent = 'Error executing code: ' + err.message + '\n\nMake sure you have an internet connection.';
                         pre.style.color = 'var(--error)';
-                    } else {
-                        pre.textContent = 'Error: ' + JSON.stringify(data);
-                        pre.style.color = 'var(--error)';
+                    });
+                };
+                
+                if (needsInput) {
+                    const runBtn = document.getElementById('runWithInputBtn');
+                    const clearBtn = document.getElementById('clearInputBtn');
+                    const inputField = document.getElementById('stdinInput');
+                    
+                    runBtn.addEventListener('click', () => {
+                        const stdin = inputField.value;
+                        runWithInput(stdin);
+                    });
+                    
+                    clearBtn.addEventListener('click', () => {
+                        inputField.value = '';
+                    });
+                    
+                    // Auto-run if input is already provided
+                    if (inputField.value.trim()) {
+                        runWithInput(inputField.value);
                     }
-                })
-                .catch(err => {
-                    pre.textContent = 'Error executing code: ' + err.message + '\n\nMake sure you have an internet connection.';
-                    pre.style.color = 'var(--error)';
-                });
+                } else {
+                    runWithInput();
+                }
             }
         }
 
